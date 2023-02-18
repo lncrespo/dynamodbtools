@@ -58,22 +58,22 @@ func registerSubcommands() {
 			case flagInt:
 				subcommand.flagValues[flag.long] = flagset.Int(flag.long, 0, "")
 
-				if val, ok := subcommand.flagValues[flag.long].(int); ok {
-					flagset.IntVar(&val, flag.short, 0, "")
+				if val, ok := subcommand.flagValues[flag.long].(*int); ok {
+					flagset.IntVar(val, flag.short, 0, "")
 				}
 
 			case flagString:
 				subcommand.flagValues[flag.long] = flagset.String(flag.long, "", "")
 
-				if val, ok := subcommand.flagValues[flag.long].(string); ok {
-					flagset.StringVar(&val, flag.short, "", "")
+				if val, ok := subcommand.flagValues[flag.long].(*string); ok {
+					flagset.StringVar(val, flag.short, "", "")
 				}
 
 			case flagBool:
 				subcommand.flagValues[flag.long] = flagset.Bool(flag.long, false, "")
 
-				if val, ok := subcommand.flagValues[flag.long].(bool); ok {
-					flagset.BoolVar(&val, flag.short, false, "")
+				if val, ok := subcommand.flagValues[flag.long].(*bool); ok {
+					flagset.BoolVar(val, flag.short, false, "")
 				}
 			}
 		}
