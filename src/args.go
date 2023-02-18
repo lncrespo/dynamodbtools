@@ -36,6 +36,7 @@ func init() {
 			name: "purge",
 			flags: []Flag{
 				{flagType: flagString, short: "h", long: "help", description: "Invoke usage"},
+				{flagType: flagString, short: "t", long: "table-name", description: "Table name"},
 			},
 			entryFunc: purge.Purge,
 		},
