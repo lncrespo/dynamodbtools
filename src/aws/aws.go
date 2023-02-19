@@ -58,44 +58,6 @@ func (keyPair KeyPair) toDynamoDbApiKey(primaryKey KeyPair) (map[string]types.At
 	return keyPairMap, nil
 }
 
-func (table *Table) Scan() ([]KeyPair, int32, error) {
-	response, err := client.Scan(context.Background(), &dynamodb.ScanInput{
-		TableName: &table.TableName,
-	})
-
-	if err != nil {
-		return nil, 0, err
-	}
-
-	scannedItemCount := response.Count
-	lastEvaluatedKey := response.LastEvaluatedKey
-	scannedItemKeys := []KeyPair{}
-
-	scannedItemKeys = appendChunkToKeyArray(*table.PrimaryKey, scannedItemKeys, response.Items)
-
-	for {
-		if lastEvaluatedKey == nil {
-			break
-		}
-
-		response, err := client.Scan(context.Background(), &dynamodb.ScanInput{
-			TableName:         &table.TableName,
-			ExclusiveStartKey: lastEvaluatedKey,
-		})
-
-		if err != nil {
-			return nil, 0, err
-		}
-
-		lastEvaluatedKey = response.LastEvaluatedKey
-		scannedItemCount += response.Count
-
-		scannedItemKeys = appendChunkToKeyArray(*table.PrimaryKey, scannedItemKeys, response.Items)
-	}
-
-	return scannedItemKeys, scannedItemCount, nil
-}
-
 func (table *Table) Purge() (int32, error) {
 	err := table.AssignKeySchema()
 
@@ -148,6 +110,45 @@ func (table *Table) AssignKeySchema() error {
 	table.PrimaryKey = &keys
 
 	return nil
+}
+
+
+func (table *Table) Scan() ([]KeyPair, int32, error) {
+	response, err := client.Scan(context.Background(), &dynamodb.ScanInput{
+		TableName: &table.TableName,
+	})
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	scannedItemCount := response.Count
+	lastEvaluatedKey := response.LastEvaluatedKey
+	scannedItemKeys := []KeyPair{}
+
+	scannedItemKeys = appendChunkToKeyArray(*table.PrimaryKey, scannedItemKeys, response.Items)
+
+	for {
+		if lastEvaluatedKey == nil {
+			break
+		}
+
+		response, err := client.Scan(context.Background(), &dynamodb.ScanInput{
+			TableName:         &table.TableName,
+			ExclusiveStartKey: lastEvaluatedKey,
+		})
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		lastEvaluatedKey = response.LastEvaluatedKey
+		scannedItemCount += response.Count
+
+		scannedItemKeys = appendChunkToKeyArray(*table.PrimaryKey, scannedItemKeys, response.Items)
+	}
+
+	return scannedItemKeys, scannedItemCount, nil
 }
 
 func appendChunkToKeyArray(
